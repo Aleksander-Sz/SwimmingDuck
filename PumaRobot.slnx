@@ -1,0 +1,7 @@
+<Solution>
+  <Configurations>
+    <Platform Name="x64" />
+    <Platform Name="x86" />
+  </Configurations>
+  <Project Path="PumaRobotProject/PumaRobotProject.vcxproj" Id="c900253d-2c2e-4d74-86f0-e985ee2b09f9" />
+</Solution>
