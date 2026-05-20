@@ -9,10 +9,10 @@ void Model::setupMesh()
 	glBindVertexArray(VAO);
 
 	glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, vertices.size() * sizeof(Vertex), vertices.data(), GL_STATIC_DRAW);
 
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), &indices[0], GL_STATIC_DRAW);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, indices.size() * sizeof(unsigned int), indices.data(), GL_STATIC_DRAW);
 
 	// vertex positions
 	glEnableVertexAttribArray(0);
@@ -31,6 +31,15 @@ void Model::Draw(Shader& shader)
 {
 	shader.use();
 	shader.setMat4("model", model);
+	if (useTexture)
+	{
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, texture);
+		shader.setInt("colorTexture", 1);
+		shader.setInt("useTexture", 1);
+	}
+	else
+		shader.setInt("useTexture", 0);
 	//draw mesh
 	glBindVertexArray(VAO);
 	glDrawElements(GL_TRIANGLES, indices.size(), GL_UNSIGNED_INT, 0);
@@ -46,37 +55,30 @@ void Model::loadModel(std::string path)
 		return;
 	}
 
-	int vertexPositionCount;
-	file >> vertexPositionCount;  // read integer directly
-
-	std::cout << vertexPositionCount << ".\n";
-	std::vector<glm::vec3> vertexPositions;
-
-	for (int i = 0; i < vertexPositionCount; i++)
-	{
-		float x, y, z;
-		file >> x >> y >> z;  // read 3 floats per line
-		vertexPositions.push_back(glm::vec3(x, y, z));
-	}
-
 	int vertexCount;
-	file >> vertexCount;
+	file >> vertexCount;  // read integer directly
+
+	std::cout << vertexCount << ".\n";
+	std::vector<glm::vec3> vertexPositions;
+	std::vector<glm::vec3> vertexNormals;
+	std::vector<glm::vec2> vertexTexCoords;
 
 	for (int i = 0; i < vertexCount; i++)
 	{
-		int vertexId;
-		file >> vertexId;
-		Vertex newVertex;
-		newVertex.position = vertexPositions[vertexId];
-
 		float x, y, z;
-		file >> x >> y >> z;  // read 3 floats per line
+		Vertex newVertex;
+		file >> x >> y >> z;  // read 3 floats
+		newVertex.position = glm::vec3(x, y, z);
+		file >> x >> y >> z;  // read 3 floats
 		newVertex.normal = glm::vec3(x, y, z);
+		file >> x >> y;  // read 2 floats
+		newVertex.texCoords = glm::vec2(x, y);
 		vertices.push_back(newVertex);
 	}
 
 	int triangleCount;
 	file >> triangleCount;
+	std::cout << triangleCount << ".\n";
 
 	for (int i = 0; i < triangleCount; i++)
 	{
@@ -268,4 +270,33 @@ void Model::Room(float size, glm::mat4 position)
 	}
 
 	setupMesh();
+}
+
+void Model::Duck(glm::mat4 position)
+{
+	model = position;
+	loadModel("Models/duck.txt");
+	int width, height, nrChannels;
+	unsigned char* data = stbi_load("Models/ducktex.jpg", &width, &height, &nrChannels, 0);
+	glGenTextures(1, &texture);
+	glActiveTexture(GL_TEXTURE1);
+	glBindTexture(GL_TEXTURE_2D, texture);
+	glTexImage2D(
+		GL_TEXTURE_2D,
+		0,
+		GL_RGB,
+		width,
+		height,
+		0,
+		GL_RGB,
+		GL_UNSIGNED_BYTE,
+		data
+	);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	stbi_image_free(data);
+	useTexture = true;
 }

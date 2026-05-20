@@ -9,7 +9,7 @@ Water::Water::Water()
     InitializeSimulation();
 	waterLevelB[10000] = 0.25f; // inicjalna fala
     waterMesh = Model();
-	waterMesh.Plane(2.0f, glm::mat4(1.0f));
+	waterMesh.Plane(10.0f, glm::mat4(1.0f));
 	glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
@@ -55,7 +55,6 @@ void Water::Water::Draw(Shader& shader)
 
 void Water::SimulateStep()
 {
-	std::cout << "Level[10000] = " << (*waterLevel1)[10000] << "\n";
     for (int i = 1; i < N - 1; i++)
     {
         for (int j = 1; j < N - 1; j++)

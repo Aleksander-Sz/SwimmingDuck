@@ -31,6 +31,7 @@ public:
 	void Plane(float size, glm::mat4 position);
 	void Cylinder(float radius, float lenght, glm::mat4 position);
 	void Room(float size, glm::mat4 position);
+	void Duck(glm::mat4 position);
 	glm::mat4 model = glm::mat4(1.0f);
 private:
 	// model data
@@ -40,5 +41,7 @@ private:
 	void setupMesh();
 	void loadModel(std::string path);
 	unsigned int VAO, VBO, EBO;
+	unsigned int texture;
+	bool useTexture = false;
 };
 #endif

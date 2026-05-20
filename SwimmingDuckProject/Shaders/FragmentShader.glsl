@@ -35,6 +35,8 @@ uniform Material material;
 
 uniform sampler2D normalMap;
 uniform int useNormalMap;
+uniform sampler2D colorTexture;
+uniform int useTexture;
 
 vec4 CalcPointLight(Light inLight, vec3 inFragPos)
 {
@@ -65,6 +67,8 @@ void main()
 {
 	//texture
 	vec3 diffuseColor = vec3(1.0, 1.0, 1.0);
+	if(useTexture == 1)
+		diffuseColor = texture(colorTexture, texCoords).rgb;
 	vec3 specularColor = vec3(1.0, 1.0, 1.0);
 	// ambient
 	vec3 ambient = diffuseColor * light.ambient;

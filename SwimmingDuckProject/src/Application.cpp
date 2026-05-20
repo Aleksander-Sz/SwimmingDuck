@@ -11,6 +11,8 @@
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
 #include <vector>
+#define STB_IMAGE_IMPLEMENTATION
+#include <stb_image.h>
 
 #define WINDOW_WIDHT 1200
 #define WINDOW_HEIGHT 800
@@ -137,12 +139,10 @@ int main()
 	glEnable(GL_CULL_FACE);
 
 	Water water;
+	Model duck("Models/duck.txt");
+	duck.Duck(glm::scale(glm::mat4(1.0f), glm::vec3(0.01f, 0.01f, 0.01f)));
 	Model room;
 	room.Room(8.0f, glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 3.0f, 0.0f)));
-	Model mirror;
-	Model mirrorBack;
-	Model cylinder;
-	cylinder.Cylinder(0.3f, 3.0f, glm::rotate(glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.7f, -1.0f)), 3.14159f / 2.0f, glm::vec3(0.0f, 0.0f, 1.0f)));
 
 	// Lighting Shader
 	// point light cube
@@ -151,24 +151,9 @@ int main()
 	unsigned int lightVAO;
 	glGenVertexArrays(1, &lightVAO);
 	glBindVertexArray(lightVAO);
-	//glBindBuffer(GL_ARRAY_BUFFER, VBO);
-	//glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void*)0);
-	//glEnableVertexAttribArray(0);
-	// directional light arrow
-	// -----
 
 	// Light properties
 	Light light = Light::PointLight(glm::vec3(1.0f, 1.0f, 1.0f), glm::vec3(0.3f), glm::vec3(2.0f, 1.0f, 0.0f));
-	glm::vec3 targetPosition;
-	glm::vec3 targetNormal(0.0f, 1.0f, 0.0f);
-	float r = 0.5f;
-	glm::mat4 circleTranslationMatrix = glm::translate(glm::mat4(1.0f), glm::vec3(-1.5f, 0.3f, 0.0f)) * glm::rotate(glm::mat4(1.0f), -0.785398163397448309615660845819875721f - 0.2f, glm::vec3(0.0f, 0.0f, 1.0f));
-	targetNormal = glm::vec3(circleTranslationMatrix * glm::vec4(targetNormal, 0.0f));
-	mirror.Plane(1.5f, circleTranslationMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.07f, 0.0f)));
-	mirrorBack.Plane(1.5f, circleTranslationMatrix * glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, -0.07f, 0.0f)) * glm::rotate(glm::mat4(1.0f), 3.14159f, glm::vec3(0.0f, 0.0f, 1.0f)));
-
-	// Mirrored world matrix
-	glm::mat4 mirroredWorldMatrix = circleTranslationMatrix * glm::scale(glm::mat4(1.0f), glm::vec3(1.0f, -1.0f, 1.0f)) * glm::inverse(circleTranslationMatrix);
 
 	int frame = 0;
 	glViewport(0, 0, windowWidth, windowHeight);
@@ -209,21 +194,13 @@ int main()
 		// Rendering the scene normally
 		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
 
-		glStencilFunc(GL_ALWAYS, 1, 0xFF);
-		glStencilMask(0x00);
-
 		ourShader.setMat4("view", camera.view());
 
-		glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-		mirror.Draw(ourShader);
-		glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-
 		room.Draw(ourShader);
-		mirrorBack.Draw(ourShader);
 		ourShader.setVec3("color", glm::vec3(1.0f, 0.0f, 0.0f));
-		cylinder.Draw(ourShader);
 
 		water.Draw(ourShader);
+		duck.Draw(ourShader);
 	
 		frame++;
 		// -----
